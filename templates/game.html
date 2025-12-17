@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>THE CORRUPTIBLES - {{ mode|upper }} OPERATION</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(180deg, #0a0e27 0%, #1a1f3a 50%, #0d1117 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #00ff00;
+            margin: 0;
+            overflow: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 0, 0.03) 0px,
+                rgba(0, 255, 0, 0.03) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        h2 {
+            margin-bottom: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+            letter-spacing: 2px;
+            color: #ff3333;
+        }
+
+        .game-box {
+            background: linear-gradient(135deg, rgba(10, 14, 39, 0.95), rgba(26, 31, 58, 0.95));
+            padding: 15px;
+            border: 3px solid #00ff00;
+            box-shadow: 0 0 40px rgba(0, 255, 0, 0.6), inset 0 0 30px rgba(0, 255, 0, 0.1);
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        canvas {
+            border: 3px solid #00ff00;
+            background: rgba(0, 0, 0, 0.8);
+            cursor: crosshair;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5), inset 0 0 20px rgba(0, 255, 0, 0.1);
+        }
+
+        .hud {
+            margin-bottom: 10px;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-around;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .hud-item {
+            background: rgba(0, 255, 0, 0.08);
+            border: 1px solid #00ff00;
+            padding: 8px 15px;
+            border-radius: 3px;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
+            font-weight: bold;
+        }
+        
+        /* bullet life display */
+        .bullets-container { display:inline-flex; gap:6px; align-items:center }
+        .bullet-icon {
+            width:14px; height:8px; border-radius:3px; background:#d9d9d9; border:1px solid #b0b0b0; box-shadow: inset 0 -2px 3px rgba(0,0,0,0.4);
+            display:inline-block;
+        }
+
+        /* floating point text */
+        .float-text {
+            position: absolute;
+            pointer-events: none;
+            color: #00ff00;
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(0,255,0,0.6);
+            transform: translate(-50%, -50%) translateY(0);
+            transition: transform 900ms ease-out, opacity 900ms ease-out;
+            opacity: 1;
+            z-index: 2000;
+            font-family: 'Courier New', monospace;
+        }
+
+        .notification {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: #ff3333;
+            padding: 12px 20px;
+            border: 2px solid #ff3333;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.8);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(10, 14, 39, 0.85), rgba(26, 31, 58, 0.85));
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(10, 14, 39, 0.98), rgba(26, 31, 58, 0.98));
+            padding: 40px;
+            border: 3px solid #00ff00;
+            text-align: center;
+            color: #00ff00;
+            min-width: 420px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 0 50px rgba(0, 255, 0, 0.6), inset 0 0 30px rgba(0, 255, 0, 0.1);
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
+        }
+        
+        .modal-content h3 {
+            color: #ff3333;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-shadow: 0 0 15px rgba(255, 51, 51, 0.8);
+            letter-spacing: 2px;
+        }
+
+        .modal button {
+            margin: 10px 5px;
+            padding: 12px 20px;
+            background: rgba(0, 255, 0, 0.1);
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .modal button:hover {
+            background: rgba(0, 255, 0, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+        }
+
+        .back-link {
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: #ff3333;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 16px;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
+        }
+
+        .back-link a:hover {
+            text-shadow: 0 0 20px rgba(255, 51, 51, 0.8);
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px 15px;
+            background: rgba(255, 51, 51, 0.1);
+            color: #ff3333;
+            border: 2px solid #ff3333;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
+        }
+
+        button:hover {
+            background: rgba(255, 51, 51, 0.2);
+            box-shadow: 0 0 15px rgba(255, 51, 51, 0.6);
+        }
+
+        /* leaderboard previously displayed on the right — removed for post-game display */
+    </style>
+</head>
+
+<body>
+    <h2>⚠ TACTICAL OPERATION {{ mode|upper }} ⚠</h2>
+
+    <div class="game-box">
+        <div id="notification" class="notification"></div>
+        <div class="hud">
+            <div class="hud-item">● CORRUPTION: <span id="corruption">0</span></div>
+            <div class="hud-item">● EXPOSURE: <span id="exposure">0</span>%</div>
+            <div class="hud-item">● RESOURCES: <span id="resources">100</span></div>
+            <div class="hud-item">● LEVEL: <span id="level">1</span></div>
+            <div class="hud-item">● BULLETS: <span id="bullets" class="bullets-container"></span></div>
+        </div>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <br>
+        <button onclick="launder()">▶ LAUNDER (-20 RES, -10 EXP)</button>
+        <button onclick="endGame()">▶ SAVE & EXTRACT</button>
+    </div>
+
+    <!-- leaderboard moved: will be shown after game over -->
+
+    <div id="missModal" class="modal">
+        <div class="modal-content">
+            <h3>⚠ EXPOSURE DETECTED ⚠</h3>
+            <p>Authorities have taken action. Mission failed.</p>
+            <button onclick="tryAgain()">▶ RETRY MISSION</button>
+            <button onclick="quitGame()">▶ ABORT</button>
+        </div>
+    </div>
+
+    <!-- Congratulatory modal shown when player clears all levels -->
+    <div id="congratsModal" class="modal">
+        <div class="modal-content">
+            <h3> CONGRATULATIONS! </h3>
+            <p>Congrats! You've successfully completed all levels.</p>
+            <div style="margin-top:12px">
+                <button onclick="saveAndShowLeaderboard()">▶ Save & View Leaderboard</button>
+                <button onclick="backToMenu()">▶ Back to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard modal shown after saving game -->
+    <div id="leaderboardModal" class="modal">
+        <div class="modal-content" id="leaderboardContent">
+            <h3>🏆 Top Corrupt Officials 🏆</h3>
+            <div id="leaderboardTableWrapper">Loading...</div>
+            <div style="margin-top:12px">
+                <button onclick="closeLeaderboard()">Close</button>
+                <button onclick="backToMenu()">Back to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="back-link">
+        <a href="{{ url_for('menu') }}">← Back to Menu</a>
+    </div>
+
+    <!-- Debug overlay for runtime errors -->
+    <div id="debugOverlay" style="position:fixed;left:12px;bottom:12px;z-index:9999;background:rgba(0,0,0,0.7);color:#00ff00;padding:8px 12px;border:2px solid rgba(0,255,0,0.2);font-family:monospace;font-size:12px;max-width:calc(100% - 24px);display:none">JS OK</div>
+
+    <!-- Sound effects (using Web Audio API for generation) -->
+    <script>
+        // Initialize audio context for sound generation
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playGunshot() {
+            // SHOTGUN BLAST: Powerful 6-layer acoustic model for shotgun effect
+            const now = audioContext.currentTime;
+            
+            // LAYER 1: Massive transient impulse (0-80ms) - intense initial shock
+            const bufferSize1 = audioContext.sampleRate * 0.08;
+            const transientBuffer = audioContext.createBuffer(1, bufferSize1, audioContext.sampleRate);
+            const transient = transientBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize1; i++) {
+                // Very sharp, aggressive attack
+                transient[i] = (Math.random() * 2 - 1) * Math.exp(-i / bufferSize1 * 8);
+            }
+            const transientSource = audioContext.createBufferSource();
+            transientSource.buffer = transientBuffer;
+            const transientGain = audioContext.createGain();
+            transientSource.connect(transientGain);
+            transientGain.connect(audioContext.destination);
+            transientGain.gain.setValueAtTime(1.0, now);
+            transientGain.gain.exponentialRampToValueAtTime(0.15, now + 0.08);
+            transientSource.start(now);
+            transientSource.stop(now + 0.08);
+            
+            // LAYER 2: Dense body noise (80-300ms) - shotgun blast body
+            const bufferSize2 = audioContext.sampleRate * 0.22;
+            const bodyBuffer = audioContext.createBuffer(1, bufferSize2, audioContext.sampleRate);
+            const bodyNoise = bodyBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize2; i++) {
+                bodyNoise[i] = Math.random() * 2 - 1;
+            }
+            const bodySource = audioContext.createBufferSource();
+            bodySource.buffer = bodyBuffer;
+            const bodyGain = audioContext.createGain();
+            bodySource.connect(bodyGain);
+            bodyGain.connect(audioContext.destination);
+            bodyGain.gain.setValueAtTime(0.85, now + 0.08);
+            bodyGain.gain.exponentialRampToValueAtTime(0.08, now + 0.3);
+            bodySource.start(now + 0.08);
+            bodySource.stop(now + 0.3);
+            
+            // LAYER 3: Deep sub-bass punch (40-200 Hz, powerful low-end)
+            const subBass = audioContext.createOscillator();
+            const subBassGain = audioContext.createGain();
+            subBass.type = 'sine';
+            subBass.connect(subBassGain);
+            subBassGain.connect(audioContext.destination);
+            subBass.frequency.setValueAtTime(200, now);
+            subBass.frequency.exponentialRampToValueAtTime(40, now + 0.2);
+            subBassGain.gain.setValueAtTime(0.9, now);
+            subBassGain.gain.exponentialRampToValueAtTime(0.15, now + 0.2);
+            subBass.start(now);
+            subBass.stop(now + 0.2);
+            
+            // LAYER 4: Mid-bass chest thump (120-500 Hz, felt impact)
+            const midBass = audioContext.createOscillator();
+            const midBassGain = audioContext.createGain();
+            midBass.type = 'sine';
+            midBass.connect(midBassGain);
+            midBassGain.connect(audioContext.destination);
+            midBass.frequency.setValueAtTime(500, now);
+            midBass.frequency.exponentialRampToValueAtTime(120, now + 0.18);
+            midBassGain.gain.setValueAtTime(0.7, now);
+            midBassGain.gain.exponentialRampToValueAtTime(0.1, now + 0.18);
+            midBass.start(now);
+            midBass.stop(now + 0.18);
+            
+            // LAYER 5: Aggressive mid-crack (1500-4000 Hz, shotgun character)
+            const midCrack = audioContext.createOscillator();
+            const midCrackGain = audioContext.createGain();
+            midCrack.type = 'sine';
+            midCrack.connect(midCrackGain);
+            midCrackGain.connect(audioContext.destination);
+            midCrack.frequency.setValueAtTime(4000, now);
+            midCrack.frequency.exponentialRampToValueAtTime(1500, now + 0.12);
+            midCrackGain.gain.setValueAtTime(0.65, now);
+            midCrackGain.gain.exponentialRampToValueAtTime(0.05, now + 0.12);
+            midCrack.start(now);
+            midCrack.stop(now + 0.12);
+            
+            // LAYER 6: Bright high-frequency snap (4000-8000 Hz, air/pellet separation)
+            const highSnap = audioContext.createOscillator();
+            const highSnapGain = audioContext.createGain();
+            highSnap.type = 'sine';
+            highSnap.connect(highSnapGain);
+            highSnapGain.connect(audioContext.destination);
+            highSnap.frequency.setValueAtTime(8000, now);
+            highSnap.frequency.exponentialRampToValueAtTime(4000, now + 0.08);
+            highSnapGain.gain.setValueAtTime(0.5, now);
+            highSnapGain.gain.exponentialRampToValueAtTime(0.02, now + 0.08);
+            highSnap.start(now);
+            highSnap.stop(now + 0.08);
+        }
+
+        function playHitImpact() {
+            // Powerful explosion/impact sound for successful hit
+            const now = audioContext.currentTime;
+            
+            // Create explosion noise
+            const bufferSize = audioContext.sampleRate * 0.2;
+            const explosionBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+            const output = explosionBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+            
+            const explosionSource = audioContext.createBufferSource();
+            explosionSource.buffer = explosionBuffer;
+            const explosionGain = audioContext.createGain();
+            explosionSource.connect(explosionGain);
+            explosionGain.connect(audioContext.destination);
+            
+            // Explosion noise envelope
+            explosionGain.gain.setValueAtTime(0.8, now);
+            explosionGain.gain.exponentialRampToValueAtTime(0.15, now + 0.08);
+            explosionGain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+            
+            explosionSource.start(now);
+            explosionSource.stop(now + 0.2);
+            
+            // Deep bass thump (impact)
+            const bass = audioContext.createOscillator();
+            const bassGain = audioContext.createGain();
+            bass.connect(bassGain);
+            bassGain.connect(audioContext.destination);
+            bass.frequency.setValueAtTime(250, now);
+            bass.frequency.exponentialRampToValueAtTime(80, now + 0.2);
+            bassGain.gain.setValueAtTime(0.8, now);
+            bassGain.gain.exponentialRampToValueAtTime(0.02, now + 0.2);
+            bass.start(now);
+            bass.stop(now + 0.2);
+            
+            // Rising chirp (impact signature)
+            const chirp = audioContext.createOscillator();
+            const chirpGain = audioContext.createGain();
+            chirp.connect(chirpGain);
+            chirpGain.connect(audioContext.destination);
+            chirp.frequency.setValueAtTime(1800, now);
+            chirp.frequency.exponentialRampToValueAtTime(3500, now + 0.12);
+            chirpGain.gain.setValueAtTime(0.35, now);
+            chirpGain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+            chirp.start(now);
+            chirp.stop(now + 0.12);
+        }
+
+        function playMissSound() {
+            // Miss/buzzer sound
+            const now = audioContext.currentTime;
+            const osc = audioContext.createOscillator();
+            const gain = audioContext.createGain();
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.setValueAtTime(600, now + 0.1);
+            osc.frequency.setValueAtTime(400, now + 0.2);
+            gain.gain.setValueAtTime(0.4, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+            osc.start(now);
+            osc.stop(now + 0.25);
+        }
+
+        function playGameOverSound() {
+            // Dramatic game over - descending sirens
+            const now = audioContext.currentTime;
+            
+            // First siren
+            const osc1 = audioContext.createOscillator();
+            const gain1 = audioContext.createGain();
+            osc1.connect(gain1);
+            gain1.connect(audioContext.destination);
+            osc1.frequency.setValueAtTime(800, now);
+            osc1.frequency.exponentialRampToValueAtTime(300, now + 0.3);
+            gain1.gain.setValueAtTime(0.35, now);
+            gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc1.start(now);
+            osc1.stop(now + 0.3);
+
+            // Second lower siren
+            const osc2 = audioContext.createOscillator();
+            const gain2 = audioContext.createGain();
+            osc2.connect(gain2);
+            gain2.connect(audioContext.destination);
+            osc2.frequency.setValueAtTime(600, now + 0.2);
+            osc2.frequency.exponentialRampToValueAtTime(150, now + 0.5);
+            gain2.gain.setValueAtTime(0.35, now + 0.2);
+            gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+            osc2.start(now + 0.2);
+            osc2.stop(now + 0.5);
+        }
+
+        function playLaunderSound() {
+            // Cash/money count sound - quick beeps
+            const now = audioContext.currentTime;
+            for (let i = 0; i < 3; i++) {
+                const delay = i * 0.1;
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                osc.frequency.setValueAtTime(1200 + i * 100, now + delay);
+                gain.gain.setValueAtTime(0.2, now + delay);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.06);
+                osc.start(now + delay);
+                osc.stop(now + delay + 0.06);
+            }
+        }
+    </script>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const notification = document.getElementById('notification');
+        const missModal = document.getElementById('missModal');
+        let corruptionLevel = {{ state.get('corruption_level', 0) }};
+        let exposureMeter = {{ state.get('exposure_meter', 0) }};
+        let resources = {{ state.get('resources', 100) }};
+        const mode = '{{ mode }}';
+
+        let targets = [];
+        let gameOver = false;
+        let resourceTimer = null;
+        let modeMultiplier = mode === 'easy' ? 20000 : mode === 'medium' ? 15000 : 10000;
+        // base speed per mode (units used for dx/dy multiplier)
+        // easy: relatively slow, medium: noticeably faster, hard: much faster
+        let targetSpeed = mode === 'easy' ? 1.2 : mode === 'medium' ? 2.4 : 3.6;
+        // bullets/lives: easy/medium 5, hard 3
+        let bullets = (mode === 'hard') ? 3 : 5;
+        // level progression
+        let level = 1;
+        const maxLevel = 5;
+
+        const corruptionMessages = [
+            "Corrupted a local official!",
+            "Bribed the police chief!",
+            "Embezzled from the treasury!",
+            "Influenced a politician!",
+            "Laundered dirty money!",
+            "Blackmailed a rival!",
+            "Falsified documents!",
+            "Evaded an audit!"
+        ];
+
+        function initTargets() {
+            targets = [];
+            const count = 4 + level; // level1 -> 5 targets, level5 -> 9 targets
+            for (let i = 0; i < count; i++) {
+                targets.push({
+                    x: Math.random() * (canvas.width - 50),
+                    y: Math.random() * (canvas.height - 50),
+                    radius: 25,
+                    dx: (Math.random() - 0.5) * targetSpeed,
+                    dy: (Math.random() - 0.5) * targetSpeed
+                });
+            }
+        }
+
+        function spawnFloatingText(canvasX, canvasY, text, color) {
+            const box = document.querySelector('.game-box');
+            const canvasRect = canvas.getBoundingClientRect();
+            const boxRect = box.getBoundingClientRect();
+            // position relative to .game-box
+            const left = canvasX + canvasRect.left - boxRect.left;
+            const top = canvasY + canvasRect.top - boxRect.top;
+            const el = document.createElement('div');
+            el.className = 'float-text';
+            el.style.left = left + 'px';
+            el.style.top = top + 'px';
+            el.style.color = color || '#00ff00';
+            el.textContent = text;
+            box.appendChild(el);
+            // animate up & fade
+            requestAnimationFrame(() => {
+                el.style.transform = 'translate(-50%, -50%) translateY(-40px)';
+                el.style.opacity = '0';
+            });
+            setTimeout(() => { try { el.remove(); } catch(e){} }, 900);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            targets.forEach(target => {
+                // coin radial gradient (light -> mid -> dark)
+                const grad = ctx.createRadialGradient(
+                    target.x - target.radius * 0.3,
+                    target.y - target.radius * 0.3,
+                    target.radius * 0.05,
+                    target.x,
+                    target.y,
+                    target.radius
+                );
+                grad.addColorStop(0, '#fff9d6');
+                grad.addColorStop(0.35, '#ffd76a');
+                grad.addColorStop(1, '#b67e12');
+
+                // main coin body
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(target.x, target.y, target.radius, 0, 2 * Math.PI);
+                ctx.fillStyle = grad;
+                ctx.shadowColor = 'rgba(0,0,0,0.6)';
+                ctx.shadowBlur = 8;
+                ctx.fill();
+
+                // coin rim
+                ctx.lineWidth = Math.max(2, Math.round(target.radius * 0.12));
+                ctx.strokeStyle = 'rgba(255,215,0,0.95)';
+                ctx.stroke();
+
+                // subtle top highlight
+                ctx.beginPath();
+                ctx.ellipse(
+                    target.x - target.radius * 0.25,
+                    target.y - target.radius * 0.35,
+                    target.radius * 0.6,
+                    target.radius * 0.28,
+                    0,
+                    0,
+                    2 * Math.PI
+                );
+                ctx.fillStyle = 'rgba(255,255,255,0.22)';
+                ctx.fill();
+
+                // coin emblem (peso sign)
+                ctx.fillStyle = 'rgba(20,20,20,0.9)';
+                ctx.font = `${Math.max(10, Math.floor(target.radius * 0.9))}px Courier New`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('₱', target.x, target.y + (target.radius * 0.06));
+
+                ctx.restore();
+            });
+        }
+
+        function updateTargets() {
+            targets.forEach(target => {
+                target.x += target.dx;
+                target.y += target.dy;
+
+                if (target.x - target.radius < 0 || target.x + target.radius > canvas.width) target.dx *= -1;
+                if (target.y - target.radius < 0 || target.y + target.radius > canvas.height) target.dy *= -1;
+            });
+        }
+
+        function showNotification(message) {
+            notification.textContent = message;
+            notification.style.opacity = 1;
+            setTimeout(() => notification.style.opacity = 0, 2000);
+        }
+
+        canvas.addEventListener('click', (e) => {
+            if (gameOver) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+
+            let hit = false;
+            
+            // Play gunshot sound on click
+            playGunshot();
+
+            targets.forEach((target, index) => {
+                const dist = Math.sqrt((clickX - target.x)**2 + (clickY - target.y)**2);
+                if (dist < target.radius) {
+                    targets.splice(index, 1);
+                    corruptionLevel += 10;
+                        exposureMeter += 10;
+                        resources += 5;
+                        playHitImpact();
+                        const message = corruptionMessages[Math.floor(Math.random() * corruptionMessages.length)];
+                        showNotification(message);
+                        // on hit: corruption +10, exposure +10, resources +5
+                        spawnFloatingText(target.x, target.y, '+10 exposure', '#ffff00');
+                        spawnFloatingText(target.x + 18, target.y - 12, '+5 resources', '#00ff00');
+                        updateHUD();
+                    hit = true;
+
+                    targets.push({
+                        x: Math.random() * (canvas.width - 50),
+                        y: Math.random() * (canvas.height - 50),
+                        radius: 25,
+                        dx: (Math.random() - 0.5) * targetSpeed,
+                        dy: (Math.random() - 0.5) * targetSpeed
+                    });
+                }
+            });
+
+            if (!hit) {
+                // miss: consume a bullet, show floating -1 bullet at click
+                playMissSound();
+                bullets = Math.max(0, bullets - 1);
+                spawnFloatingText(clickX, clickY, '-1 bullet', '#ff3333');
+                updateHUD();
+                if (bullets <= 0) {
+                    // out of bullets -> mission failed
+                    gameOver = true;
+                    playGameOverSound();
+                    showNotification('Out of bullets. Mission failed.');
+                    setTimeout(() => { missModal.style.display = 'flex'; }, 600);
+                }
+            }
+        });
+
+        function launder() {
+            if (resources >= 20 && !gameOver) {
+                resources -= 20;
+                exposureMeter = Math.max(0, exposureMeter - 10);
+                playLaunderSound();
+                showNotification("Funds laundered! Generating resources...");
+                
+                if (resourceTimer) clearInterval(resourceTimer);
+                resourceTimer = setInterval(() => {
+                    resources += 10;
+                    if (mode === 'hard' && Math.random() < 0.1) {
+                        exposureMeter += 2;
+                        showNotification("Risky generation! Exposure +2.");
+                    }
+                    updateHUD();
+                }, modeMultiplier);
+
+                updateHUD();
+            } else if (!gameOver) {
+                showNotification("Not enough resources!");
+            }
+        }
+
+        function tryAgain() {
+            missModal.style.display = 'none';
+            exposureMeter = 0;
+            resources = 100;
+            // reset corruption when retrying after game over
+            corruptionLevel = 0;
+            // reset bullets to mode default when retrying
+            bullets = (mode === 'hard') ? 3 : 5;
+            // reset level and target speed to initial mode defaults
+            level = 1;
+            targetSpeed = (mode === 'easy') ? 1.2 : (mode === 'medium') ? 2.4 : 3.6;
+            if (resourceTimer) clearInterval(resourceTimer);
+            initTargets();
+            gameOver = false;
+            updateHUD();
+            gameLoop();
+        }
+
+        function quitGame() {
+            missModal.style.display = 'none';
+            // Save the game and show leaderboard modal instead of leaving the page
+            saveAndShowLeaderboard();
+        }
+
+        function updateHUD() {
+            document.getElementById('corruption').innerText = corruptionLevel;
+            document.getElementById('exposure').innerText = exposureMeter;
+            document.getElementById('resources').innerText = resources;
+            // update bullets display
+            const bwrap = document.getElementById('bullets');
+            if (bwrap) {
+                bwrap.innerHTML = '';
+                for (let i=0;i<bullets;i++) {
+                    const el = document.createElement('span');
+                    el.className = 'bullet-icon';
+                    bwrap.appendChild(el);
+                }
+            }
+            // update level display
+            const lvl = document.getElementById('level');
+            if (lvl) lvl.innerText = level;
+
+            if (exposureMeter >= 100 && !gameOver) {
+                if (level < maxLevel) {
+                    // advance to next level
+                    level += 1;
+                    exposureMeter = 0;
+                    // slightly increase difficulty
+                    targetSpeed *= 1.15;
+                    showNotification('Level ' + level + ' reached!');
+                    // brief floating level-up text
+                    spawnFloatingText(canvas.width/2, 40, 'LEVEL ' + level, '#00ff00');
+                    initTargets();
+                    updateHUD();
+                } else {
+                    // final level hit -> show congrats modal and end game
+                    gameOver = true;
+                    playGameOverSound();
+                    showNotification("CONGRATULATIONS! Mission complete.");
+                    setTimeout(() => {
+                        document.getElementById('congratsModal').style.display = 'flex';
+                    }, 1200);
+                }
+            }
+        }
+
+        function endGame() {
+            if (resourceTimer) clearInterval(resourceTimer);
+            // Save and show leaderboard in modal
+            saveAndShowLeaderboard();
+        }
+
+        async function saveAndShowLeaderboard() {
+            try {
+                // validate mode before sending
+                const validModes = ['easy','medium','hard'];
+                const modeToSend = validModes.includes(mode) ? mode : 'easy';
+                await fetch('/corruption', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        corruption_level: corruptionLevel,
+                        exposure_meter: exposureMeter,
+                        resources: resources,
+                        mode: modeToSend
+                    })
+                });
+
+                const resp = await fetch('/api/highscores');
+                const data = await resp.json();
+                populateLeaderboardModal(data);
+                // reset local corrupted points after saving/showing leaderboard
+                corruptionLevel = 0;
+                updateHUD();
+            } catch (err) {
+                console.error('Could not load leaderboard', err);
+                alert('Failed to load leaderboard.');
+            }
+        }
+
+        function populateLeaderboardModal(data) {
+            const wrap = document.getElementById('leaderboardTableWrapper');
+            if (!Array.isArray(data) || data.length === 0) {
+                wrap.innerHTML = '<p style="color:#00ff00;text-shadow:0 0 10px rgba(0,255,0,0.5)">No Corrupted Points yet.</p>';
+            } else {
+                let html = '<table style="width:100%;border-collapse:collapse;color:#00ff00;text-shadow:0 0 5px rgba(0,255,0,0.4)">';
+                html += '<tr><th style="padding:10px;border:1px solid rgba(0,255,0,0.3);background:rgba(0,255,0,0.1);text-shadow:0 0 10px rgba(0,255,0,0.6)">Rank</th><th style="padding:10px;border:1px solid rgba(0,255,0,0.3);background:rgba(0,255,0,0.1);text-shadow:0 0 10px rgba(0,255,0,0.6)">Name</th><th style="padding:10px;border:1px solid rgba(0,255,0,0.3);background:rgba(0,255,0,0.1);text-shadow:0 0 10px rgba(0,255,0,0.6)">Corrupted Points</th><th style="padding:10px;border:1px solid rgba(0,255,0,0.3);background:rgba(0,255,0,0.1);text-shadow:0 0 10px rgba(0,255,0,0.6)">Mode</th><th style="padding:10px;border:1px solid rgba(0,255,0,0.3);background:rgba(0,255,0,0.1);text-shadow:0 0 10px rgba(0,255,0,0.6)">Date</th></tr>';
+                // build per-mode top lists: dedupe by username within each mode and keep highest score per user
+                const modes = ['easy','medium','hard'];
+                modes.forEach(modeKey => {
+                    const entries = data.filter(e => (e.mode||'').toLowerCase() === modeKey);
+                    const bestByUser = {};
+                    entries.forEach(entry => {
+                        const uname = (entry.username||'anon');
+                        if (!bestByUser[uname]) bestByUser[uname] = entry;
+                        else {
+                            const cur = bestByUser[uname];
+                            const a = Number(entry.corruption_level) || 0;
+                            const b = Number(cur.corruption_level) || 0;
+                            if (a > b) bestByUser[uname] = entry;
+                            else if (a === b) {
+                                if ((entry.created_at||'') > (cur.created_at||'')) bestByUser[uname] = entry;
+                            }
+                        }
+                    });
+                    const filtered = Object.values(bestByUser).sort((a,b) => (Number(b.corruption_level)||0) - (Number(a.corruption_level)||0)).slice(0,10);
+                    // render section for this mode
+                    html += `<h4 style="margin-top:12px;color:#00ff00">${modeKey.toUpperCase()} Top</h4>`;
+                    html += '<table style="width:100%;border-collapse:collapse;color:#00ff00;text-shadow:0 0 5px rgba(0,255,0,0.4);margin-bottom:12px">';
+                    html += '<tr><th style="padding:10px;border:1px solid rgba(0,255,0,0.3);background:rgba(0,255,0,0.1)">Rank</th><th style="padding:10px;border:1px solid rgba(0,255,0,0.3);background:rgba(0,255,0,0.1)">Name</th><th style="padding:10px;border:1px solid rgba(0,255,0,0.3);background:rgba(0,255,0,0.1)">Corrupted Points</th><th style="padding:10px;border:1px solid rgba(0,255,0,0.3);background:rgba(0,255,0,0.1)">Date</th></tr>';
+                    if (filtered.length === 0) {
+                        html += `<tr><td colspan="4" style="padding:8px;border:1px solid rgba(0,255,0,0.2)">No scores yet for ${modeKey.toUpperCase()}.</td></tr>`;
+                    } else {
+                        filtered.forEach((entry, idx) => {
+                            html += `<tr><td style="padding:8px;border:1px solid rgba(0,255,0,0.2)">${idx+1}</td><td style="padding:8px;border:1px solid rgba(0,255,0,0.2)">${entry.username||'anon'}</td><td style="padding:8px;border:1px solid rgba(0,255,0,0.2)">${entry.corruption_level}</td><td style="padding:8px;border:1px solid rgba(0,255,0,0.2);font-size:12px">${entry.created_at||''}</td></tr>`;
+                        });
+                    }
+                    html += '</table>';
+                });
+                wrap.innerHTML = html;
+            }
+
+            document.getElementById('leaderboardModal').style.display = 'flex';
+        }
+
+        function closeLeaderboard() {
+            document.getElementById('leaderboardModal').style.display = 'none';
+        }
+
+        function backToMenu() {
+            window.location.href = '{{ url_for("menu") }}';
+        }
+
+        function gameLoop() {
+            if (!gameOver) {
+                updateTargets();
+                draw();
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // safe init with error capture
+        try {
+            initTargets();
+            gameLoop();
+            updateHUD();
+            const dbg = document.getElementById('debugOverlay');
+            if (dbg) { dbg.textContent = 'JS OK'; dbg.style.display = 'block'; dbg.style.borderColor = 'rgba(0,255,0,0.6)'; }
+        } catch (err) {
+            console.error('Game init error', err);
+            const dbg = document.getElementById('debugOverlay');
+            if (dbg) { dbg.textContent = 'Error: ' + (err && err.message ? err.message : err); dbg.style.display = 'block'; dbg.style.borderColor = 'rgba(255,0,0,0.8)'; }
+        }
+
+        // global error handlers
+        window.addEventListener('error', function(e){
+            const dbg = document.getElementById('debugOverlay');
+            if (dbg) { dbg.textContent = 'Error: ' + (e && e.message ? e.message : e); dbg.style.display = 'block'; dbg.style.borderColor = 'rgba(255,0,0,0.8)'; }
+            console.error('Unhandled error', e);
+        });
+        window.addEventListener('unhandledrejection', function(evt){
+            const dbg = document.getElementById('debugOverlay');
+            if (dbg) { dbg.textContent = 'Promise rejection: ' + (evt && evt.reason ? (evt.reason.message||evt.reason) : evt); dbg.style.display = 'block'; dbg.style.borderColor = 'rgba(255,0,0,0.8)'; }
+            console.error('Unhandled rejection', evt);
+        });
+    </script>
+</body>
+</html>

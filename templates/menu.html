@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>THE CORRUPTIBLES - Mission Select</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0e27;
+            color: #00ff00;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        .header {
+            margin: 40px auto 20px auto;
+            text-align: center;
+        }
+        .game-mode-select {
+            margin: 40px auto;
+            max-width: 900px;
+            text-align: center;
+        }
+        .game-mode-select h2 {
+            color: #ff3333;
+            text-shadow: 0 0 10px #ff3333;
+            margin-bottom: 32px;
+        }
+        .game-mode-row {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 32px 0;
+        }
+        .mode-card {
+            border: 2px solid #00ff00;
+            padding: 32px 48px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 0 20px #00ff00;
+            background: rgba(10,14,39,0.85);
+            text-decoration: none;
+            display: block;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .mode-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 30px currentColor;
+        }
+        .mode-card.medium {
+            border-color: #ffff00;
+            box-shadow: 0 0 20px #ffff00;
+        }
+        .mode-card.medium:hover {
+            box-shadow: 0 0 30px #ffff00;
+        }
+        .mode-card.hard {
+            border-color: #ff3333;
+            box-shadow: 0 0 20px #ff3333;
+        }
+        .mode-card.hard:hover {
+            box-shadow: 0 0 30px #ff3333;
+        }
+        .mode-dot {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 12px;
+            border-radius: 50%;
+            display: inline-block;
+            position: relative;
+            box-shadow: inset 0 -6px 10px rgba(0,0,0,0.25), 0 8px 20px rgba(0,0,0,0.6);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .mode-dot.easy {
+            background: radial-gradient(circle at 35% 30%, #c6ffd0 0%, #5ce06a 45%, #0d6a10 100%);
+        }
+        .mode-dot.medium {
+            background: radial-gradient(circle at 35% 30%, #fff7c6 0%, #ffd24d 45%, #b8860b 100%);
+        }
+        .mode-dot.hard {
+            background: radial-gradient(circle at 35% 30%, #ffcccc 0%, #ff5a5a 45%, #8b0000 100%);
+        }
+        .mode-dot::after {
+            content: '';
+            position: absolute;
+            left: 10%;
+            top: 10%;
+            width: 80%;
+            height: 30%;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.28);
+            filter: blur(1px);
+            mix-blend-mode: overlay;
+        }
+        .mode-card:hover .mode-dot { transform: translateY(-4px) scale(1.04); }
+        .mode-title {
+            font-size: 32px;
+            margin: 12px 0 8px 0;
+            text-shadow: 0 0 10px currentColor;
+        }
+        .mode-desc {
+            opacity: 0.7;
+        }
+        .scores-section {
+            margin: 40px auto;
+            max-width: 900px;
+            background: rgba(10,14,39,0.85);
+            border: 2px solid #00ff00;
+            border-radius: 16px;
+            box-shadow: 0 0 30px #00ff00;
+            padding: 32px;
+        }
+        .scores-section h2 {
+            color: #00ff00;
+            text-shadow: 0 0 10px #00ff00;
+            margin-bottom: 24px;
+        }
+        .scores-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: #00ff00;
+            text-shadow: 0 0 5px rgba(0,255,0,0.4);
+        }
+        .scores-table th, .scores-table td {
+            padding: 10px;
+            border: 1px solid rgba(0,255,0,0.3);
+        }
+        .scores-table th {
+            background: rgba(0,255,0,0.1);
+            font-weight: bold;
+        }
+        .scores-table tr:nth-child(even) {
+            background: rgba(0,255,0,0.05);
+        }
+        .logout-btn {
+            display: inline-block;
+            padding: 12px 20px;
+            background: rgba(255, 51, 51, 0.1);
+            color: #ff3333;
+            border: 2px solid #ff3333;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
+            cursor: pointer;
+            margin-top: 32px;
+        }
+        .logout-btn:hover {
+            background: rgba(255, 51, 51, 0.2);
+            box-shadow: 0 0 20px rgba(255, 51, 51, 0.6), inset 0 0 10px rgba(255, 51, 51, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><span style="color:#ffae00">₱</span> The Corruptibles</h1>
+        <p>Welcome, <span style="color:#00ff00;font-weight:bold">{{ username }}</span>! Choose your game mode to begin.</p>
+    </div>
+    <div class="game-mode-select">
+        <h2>SELECT GAME MODE</h2>
+        <div class="game-mode-row">
+            <a href="{{ url_for('play', mode='easy') }}" class="mode-card easy">
+                <div class="mode-dot easy" aria-hidden="true"></div>
+                <div class="mode-title" style="color:#00ff00">Easy</div>
+                <div class="mode-desc" style="color:#00ff00">Beginner level – Slow targets, low exposure risk</div>
+            </a>
+            <a href="{{ url_for('play', mode='medium') }}" class="mode-card medium">
+                <div class="mode-dot medium" aria-hidden="true"></div>
+                <div class="mode-title" style="color:#ffff00">Medium</div>
+                <div class="mode-desc" style="color:#ffff00">Intermediate – Normal speed, moderate risk</div>
+            </a>
+            <a href="{{ url_for('play', mode='hard') }}" class="mode-card hard">
+                <div class="mode-dot hard" aria-hidden="true"></div>
+                <div class="mode-title" style="color:#ff3333">Hard</div>
+                <div class="mode-desc" style="color:#ff3333">Advanced – Fast targets, high exposure risk</div>
+            </a>
+        </div>
+    </div>
+    <div class="scores-section">
+        <h2>Top Corrupt Officials</h2>
+        {% if highscores %}
+            {% for m,label in [('easy','Easy'),('medium','Medium'),('hard','Hard')] %}
+                <h3 style="color:#00ff00;margin-top:12px">{{ label }} Top</h3>
+                <table class="scores-table" style="margin-bottom:18px">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Name</th>
+                            <th>Corrupted Points</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set seen = namespace(users=[]) %}
+                        {% set count = 0 %}
+                        {% for s in highscores|selectattr('mode','equalto',m)|list|sort(attribute='corruption_level', reverse=True) %}
+                            {% set uname = s.username or 'Anonymous' %}
+                            {% if uname not in seen.users and count < 10 %}
+                                {% set _ = seen.users.append(uname) %}
+                                {% set count = count + 1 %}
+                                <tr>
+                                    <td>{{ count }}</td>
+                                    <td>{{ s.username or 'Anonymous' }}</td>
+                                    <td>{{ s.corruption_level }}</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                        {% if count == 0 %}
+                            <tr><td colspan="3">No scores yet for {{ label }}.</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            {% endfor %}
+        {% else %}
+            <p>No scores yet.</p>
+        {% endif %}
+    </div>
+    <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+    </body>
+    </html>
+        
+       

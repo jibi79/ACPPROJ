@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>THE CORRUPTIBLES - ANTI-CORRUPTION ENLISTMENT</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(180deg, #0a0e27 0%, #1a1f3a 50%, #0d1117 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: #00ff00;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 0, 0.03) 0px,
+                rgba(0, 255, 0, 0.03) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .container {
+            background: linear-gradient(135deg, rgba(10, 14, 39, 0.98), rgba(26, 31, 58, 0.98));
+            padding: 40px;
+            border: 2px solid #00ff00;
+            box-shadow: 
+                0 0 30px rgba(0, 255, 0, 0.5),
+                inset 0 0 20px rgba(0, 255, 0, 0.1);
+            max-width: 420px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        h2 {
+            color: #ff3333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 22px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(255, 51, 51, 0.6);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            color: #00ff00;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #00ff00;
+            background: rgba(0, 255, 0, 0.05);
+            color: #00ff00;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 8px;
+        }
+        
+        input::placeholder {
+            color: rgba(0, 255, 0, 0.4);
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #00ff00;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.6), inset 0 0 10px rgba(0, 255, 0, 0.1);
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px 20px;
+            background: rgba(255, 51, 51, 0.1);
+            color: #ff3333;
+            font-weight: bold;
+            border: 2px solid #ff3333;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
+        }
+        
+        button:hover {
+            background: rgba(255, 51, 51, 0.2);
+            box-shadow: 0 0 20px rgba(255, 51, 51, 0.6), inset 0 0 10px rgba(255, 51, 51, 0.2);
+        }
+        
+        .link-group {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+        }
+        
+        .link-group a {
+            color: #00ff00;
+            text-decoration: none;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+        
+        .link-group a:hover {
+            text-shadow: 0 0 20px rgba(0, 255, 0, 0.8);
+        }
+        
+        .alert {
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 2px solid;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+        
+        .alert-error {
+            background: rgba(255, 51, 51, 0.1);
+            color: #ff3333;
+            border-color: #ff3333;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
+        }
+        
+        .alert-success {
+            background: rgba(0, 255, 0, 0.1);
+            color: #00ff00;
+            border-color: #00ff00;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>▶ ANTI-CORRUPTION ENLISTMENT</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <form method="post">
+            <div class="form-group">
+                <label>● USERNAME</label>
+                <input type="text" name="username" placeholder="Choose your username" required>
+            </div>
+            <div class="form-group">
+                <label>● AGENT AGE</label>
+                <input type="number" name="age" placeholder="Age (optional)" min="18" max="120">
+            </div>
+            <div class="form-group">
+                <label>● SECURITY CODE</label>
+                <input type="password" name="password" placeholder="Set security code" required>
+            </div>
+            <div class="form-group">
+                <label>● CONFIRM CODE</label>
+                <input type="password" name="confirm_password" placeholder="Confirm security code" required>
+            </div>
+            <button type="submit">▶ COMPLETE ENLISTMENT</button>
+        </form>
+        <div class="link-group">
+            Already enlisted? <a href="{{ url_for('login') }}">DEPLOY</a>
+        </div>
+    </div>
+</body>
+</html>

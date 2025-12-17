@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>COMBAT CORRUPTION - Global Rankings</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(180deg, #0a0e27 0%, #1a1f3a 50%, #0d1117 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #00ff00;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 0, 0.03) 0px,
+                rgba(0, 255, 0, 0.03) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, rgba(10, 14, 39, 0.95), rgba(26, 31, 58, 0.95));
+            border: 3px solid #00ff00;
+            padding: 40px;
+            box-shadow: 
+                0 0 40px rgba(0, 255, 0, 0.5),
+                inset 0 0 30px rgba(0, 255, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #00ff00;
+            padding-bottom: 20px;
+        }
+        
+        .header h1 {
+            color: #ff3333;
+            font-size: 36px;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(255, 51, 51, 0.8);
+        }
+        
+        .header p {
+            color: #00ff00;
+            font-size: 14px;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            letter-spacing: 1px;
+        }
+        
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0, 255, 0, 0.02);
+        }
+        
+        .leaderboard-table th {
+            background: rgba(0, 255, 0, 0.1);
+            color: #00ff00;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 14px;
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+            letter-spacing: 1px;
+        }
+        
+        .leaderboard-table td {
+            padding: 15px;
+            border-top: 1px solid rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+            font-size: 14px;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.4);
+        }
+        
+        .leaderboard-table tr:hover td {
+            background: rgba(0, 255, 0, 0.1);
+        }
+        
+        .leaderboard-table tr:nth-child(even) td {
+            background: rgba(0, 255, 0, 0.03);
+        }
+        
+        .rank {
+            font-weight: bold;
+            color: #ff3333;
+            font-size: 16px;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
+        }
+        
+        .rank-1 { color: #ffff00; text-shadow: 0 0 15px rgba(255, 255, 0, 0.8); }
+        .rank-2 { color: #00ffff; text-shadow: 0 0 15px rgba(0, 255, 255, 0.8); }
+        .rank-3 { color: #ff6600; text-shadow: 0 0 15px rgba(255, 102, 0, 0.8); }
+        
+        .score {
+            font-weight: bold;
+            color: #00ff00;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
+        }
+        
+        .mode-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+            border: 1px solid;
+        }
+        
+        .mode-easy { 
+            background: rgba(0, 255, 0, 0.1);
+            color: #00ff00;
+            border-color: #00ff00;
+            text-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
+        }
+        
+        .mode-medium { 
+            background: rgba(255, 255, 0, 0.1);
+            color: #ffff00;
+            border-color: #ffff00;
+            text-shadow: 0 0 8px rgba(255, 255, 0, 0.6);
+        }
+        
+        .mode-hard { 
+            background: rgba(255, 51, 51, 0.1);
+            color: #ff3333;
+            border-color: #ff3333;
+            text-shadow: 0 0 8px rgba(255, 51, 51, 0.6);
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 20px;
+            background: rgba(255, 51, 51, 0.1);
+            color: #ff3333;
+            border: 2px solid #ff3333;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
+        }
+        
+        .back-link:hover {
+            background: rgba(255, 51, 51, 0.2);
+            box-shadow: 0 0 20px rgba(255, 51, 51, 0.6);
+        }
+        .filter-controls { display:inline-flex; gap:10px; }
+        .filter-btn { background:transparent; color:#00ff00; border:2px solid rgba(0,255,0,0.2); padding:8px 12px; border-radius:6px; cursor:pointer; font-weight:bold }
+        .filter-btn.active { border-color:#00ff00; box-shadow:0 0 14px rgba(0,255,0,0.5); }
+        .mode-section { transition: opacity 200ms ease; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏆 THE CORRUPTIBLES 🏆</h1>
+            <p>Top Corrupt Officials - Highest Corrupted Points</p>
+        </div>
+        </div>
+
+        <div style="text-align:center;margin:18px 0">
+            <div class="filter-controls">
+                <button class="filter-btn active" data-mode="all">All</button>
+                <button class="filter-btn" data-mode="easy">Easy</button>
+                <button class="filter-btn" data-mode="medium">Medium</button>
+                <button class="filter-btn" data-mode="hard">Hard</button>
+            </div>
+        </div>
+
+        {% if leaderboard %}
+            {# show per-mode top lists, deduped per username within each mode #}
+            {% for m,label in [('easy','Easy'),('medium','Medium'),('hard','Hard')] %}
+                <div class="mode-section" data-mode="{{ m }}">
+                <h2 style="margin-top:18px;color:#00ff00">{{ label }} Top Corrupt Officials</h2>
+                <table class="leaderboard-table" style="margin-bottom:18px">
+                    <thead>
+                        <tr>
+                            <th>RANK</th>
+                            <th>NAME</th>
+                            <th>CORRUPTED POINTS</th>
+                            <th>DATE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set seen = namespace(users=[]) %}
+                        {% set count = 0 %}
+                        {% for entry in leaderboard|selectattr('mode','equalto',m)|list|sort(attribute='corruption_level', reverse=True) %}
+                            {% set uname = entry.username or 'Anonymous' %}
+                            {% if uname not in seen.users and count < 10 %}
+                                {% set _ = seen.users.append(uname) %}
+                                {% set count = count + 1 %}
+                                <tr>
+                                    <td>
+                                        {% if count == 1 %}
+                                            <span class="rank rank-1">🥇 #{{ count }}</span>
+                                        {% elif count == 2 %}
+                                            <span class="rank rank-2">🥈 #{{ count }}</span>
+                                        {% elif count == 3 %}
+                                            <span class="rank rank-3">🥉 #{{ count }}</span>
+                                        {% else %}
+                                            <span class="rank">#{{ count }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ entry.username or 'Anonymous' }}</td>
+                                    <td><span class="score">{{ entry.corruption_level }}</span></td>
+                                    <td>{{ entry.created_at[:19] if entry.created_at else 'N/A' }}</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                        {% if count == 0 %}
+                            <tr><td colspan="4">No scores yet for {{ label }}.</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="text-align:center; color:#666; font-size:16px; margin:30px 0;">No Corrupted Points yet. Start playing to appear on the leaderboard!</p>
+        {% endif %}
+
+        <div style="text-align:center;">
+            <a href="{{ url_for('menu') }}" class="back-link">Back to Menu</a>
+        </div>
+    </div>
+</body>
+</html>
+<script>
+// client-side filter for leaderboard modes
+;(function(){
+    function showMode(mode){
+        document.querySelectorAll('.mode-section').forEach(function(sec){
+            if(mode==='all' || sec.dataset.mode===mode){
+                sec.style.display = '';
+                sec.style.opacity = '1';
+            } else {
+                sec.style.display = 'none';
+                sec.style.opacity = '0';
+            }
+        });
+        document.querySelectorAll('.filter-btn').forEach(function(b){
+            b.classList.toggle('active', b.dataset.mode === mode);
+        });
+    }
+    document.addEventListener('DOMContentLoaded', function(){
+        document.querySelectorAll('.filter-btn').forEach(function(btn){
+            btn.addEventListener('click', function(){ showMode(btn.dataset.mode); });
+        });
+        // default to all
+        showMode('all');
+    });
+})();
+</script>

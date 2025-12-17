@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>THE CORRUPTIBLES - Elite Operations</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(180deg, #0a0e27 0%, #1a1f3a 50%, #0d1117 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: #00ff00;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 0, 0.03) 0px,
+                rgba(0, 255, 0, 0.03) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .container {
+            background: linear-gradient(135deg, rgba(10, 14, 39, 0.95), rgba(26, 31, 58, 0.95));
+            padding: 50px;
+            border: 3px solid #00ff00;
+            box-shadow: 
+                0 0 30px rgba(0, 255, 0, 0.5),
+                inset 0 0 20px rgba(0, 255, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        h1 {
+            color: #ff3333;
+            margin-bottom: 10px;
+            font-size: 48px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-shadow: 0 0 20px rgba(255, 51, 51, 0.8), 0 0 40px rgba(255, 0, 0, 0.5);
+            animation: glitch 0.3s infinite;
+        }
+        
+        @keyframes glitch {
+            0%, 100% { text-shadow: 0 0 20px rgba(255, 51, 51, 0.8), 0 0 40px rgba(255, 0, 0, 0.5); }
+            50% { text-shadow: 0 0 20px rgba(255, 51, 51, 0.6), -2px 2px 20px rgba(0, 255, 0, 0.4); }
+        }
+        
+        .subtitle {
+            color: #00ff00;
+            margin-bottom: 40px;
+            font-size: 16px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+        
+        .status-bar {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #00ff00;
+            padding: 15px;
+            margin-bottom: 30px;
+            font-size: 12px;
+            color: #00ff00;
+            text-align: left;
+            letter-spacing: 1px;
+            box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.2);
+        }
+        
+        .status-bar div {
+            margin: 5px 0;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        a {
+            text-decoration: none;
+            flex: 1;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border: 2px solid #00ff00;
+            background: rgba(0, 255, 0, 0.05);
+            color: #00ff00;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+        
+        .btn-primary {
+            background: rgba(255, 51, 51, 0.1);
+            border: 2px solid #ff3333;
+            color: #ff3333;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
+        }
+        
+        button:hover {
+            background: rgba(0, 255, 0, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.6), inset 0 0 10px rgba(0, 255, 0, 0.2);
+            transform: scale(1.02);
+        }
+        
+        .btn-primary:hover {
+            background: rgba(255, 51, 51, 0.2);
+            box-shadow: 0 0 20px rgba(255, 51, 51, 0.6), inset 0 0 10px rgba(255, 51, 51, 0.2);
+            border-color: #ff3333;
+        }
+    </style>
+</head>
+<body>
+        <div class="container">
+            <h1>THE CORRUPTIBLES</h1>
+            <p class="subtitle">ANTI-CORRUPTION TASK FORCE</p>
+        
+        <div class="status-bar">
+            <div>▶ SYSTEM STATUS: ONLINE</div>
+            <div>▶ CORRUPTION TARGETS: IDENTIFIED</div>
+            <div>▶ MISSION AVAILABLE</div>
+        </div>
+        
+        <p class="subtitle">Corruption detected. One shot. No mercy.</p>
+        
+        <div class="button-group">
+            <a href="/login"><button class="btn-primary">● DEPLOY</button></a>
+            <a href="/register"><button>● ENLIST</button></a>
+        </div>
+    </div>
+</body>
+</html>
